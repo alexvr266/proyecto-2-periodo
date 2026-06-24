@@ -231,7 +231,6 @@
             display: flex;
             gap: 10px;
             align-items: center;
-            margin-left: auto;
             flex-wrap: wrap;
         }
         
@@ -241,6 +240,7 @@
             border-radius: 5px;
             font-size: 14px;
             background: white;
+            min-width: 100px;
         }
         
         .filter-group label {
@@ -283,6 +283,12 @@
             color: #333;
         }
         
+        .buscador-nie .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
@@ -309,6 +315,7 @@
             padding: 8px;
             text-align: center;
             border: 1px solid #ddd;
+            cursor: pointer;
         }
         
         tr:nth-child(even) {
@@ -530,6 +537,11 @@
             font-size: 13px;
         }
         
+        .stat-card.active {
+            border: 2px solid #1F3864;
+            background: #e8f0fe;
+        }
+        
         .no-registros {
             text-align: center;
             padding: 30px;
@@ -541,7 +553,6 @@
             display: none !important;
         }
         
-        /* Estilos para el calendario (date input) */
         input[type="date"] {
             padding: 10px;
             border: 1px solid #ddd;
@@ -563,6 +574,17 @@
             padding: 5px;
         }
         
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #1F3864;
+            font-size: 16px;
+        }
+        
+        .fila-seleccionada {
+            background: #d4edda !important;
+        }
+        
         @media (max-width: 768px) {
             .toolbar {
                 flex-direction: column;
@@ -575,6 +597,7 @@
             .filter-group {
                 margin-left: 0;
                 width: 100%;
+                justify-content: center;
             }
             
             .filter-group select {
@@ -617,7 +640,7 @@
 <body>
     <!-- LOGIN -->
     <div id="loginContainer" class="login-container">
-        <div class="logo">S</div>
+        <div class="logo">📚</div>
         <h2>Sistema de Registro</h2>
         <p class="subtitle">Bachillerato - 1°, 2° y 3° Año</p>
         
@@ -668,13 +691,9 @@
             </div>
         </div>
         
-        <!-- Toolbar -->
+        <!-- TOOLBAR MODIFICADA: SOLO ESTADÍSTICAS Y FILTROS -->
         <div class="toolbar">
-            <button class="btn btn-primary" onclick="abrirModal()" id="btnNuevo">Nuevo Registro</button>
-            <button class="btn btn-danger" onclick="eliminarRegistro()" id="btnEliminar">Eliminar</button>
-            <button class="btn btn-success" onclick="actualizarTabla()">Actualizar</button>
-            <button class="btn btn-warning" onclick="mostrarEstadisticas()">Estadisticas</button>
-            <button class="btn btn-info" onclick="exportarExcel()">Exportar Excel</button>
+            <button class="btn btn-warning" onclick="mostrarEstadisticas()">📊 Estadísticas</button>
             
             <div class="filter-group">
                 <label>Año:</label>
@@ -685,33 +704,46 @@
                     <option value="3°">3° Año</option>
                 </select>
                 
+                <label>Sección:</label>
+                <select id="filtroSeccion" onchange="aplicarFiltros()">
+                    <option value="todos">Todas</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                </select>
+                
                 <label>Tipo:</label>
                 <select id="filtroTipo" onchange="aplicarFiltros()">
                     <option value="todos">Todos</option>
-                    <option value="demerito">Demeritos</option>
+                    <option value="demerito">Deméritos</option>
                     <option value="redencion">Redenciones</option>
                     <option value="reconocimiento">Reconocimientos</option>
                 </select>
             </div>
         </div>
         
-        <!-- Buscador por NIE (solo para profesores) -->
+        <!-- Buscador por NIE -->
         <div id="buscadorNie" class="buscador-nie">
             <label>Buscar por NIE:</label>
             <input type="text" id="inputNie" placeholder="Ingrese el NIE del estudiante" onkeyup="buscarPorNie()">
             <span id="resultadoNie" class="resultado"></span>
-            <button class="btn btn-success" onclick="agregarDemeritoPorNie()" style="padding: 8px 20px;">Agregar Demerito</button>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="agregarDemeritoPorNie()">Agregar Demérito</button>
+                <button class="btn btn-info" onclick="agregarRedencionPorNie()" id="btnRedencionNie">Agregar Redención</button>
+            </div>
         </div>
         
         <!-- Stats -->
         <div class="stats" id="statsContainer">
             <div class="stat-card">
                 <div class="stat-number" id="totalRegistros">0</div>
-                <div class="stat-label">Total Registros</div>
+                <div class="stat-label">Total Estudiantes</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="totalDemeritos">0</div>
-                <div class="stat-label">Demeritos</div>
+                <div class="stat-label">Deméritos</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="totalRedenciones">0</div>
@@ -762,7 +794,7 @@
                 <tbody id="cuerpoTabla">
                     <tr>
                         <td colspan="17" class="no-registros">
-                            No hay registros disponibles
+                            <div class="loading">🔄 Cargando datos desde MySQL...</div>
                         </td>
                     </tr>
                 </tbody>
@@ -896,11 +928,11 @@
         </div>
     </div>
     
-    <!-- MODAL DEMERITO POR NIE -->
+    <!-- MODAL DEMERITO / REDENCION POR NIE -->
     <div class="modal" id="modalDemeritoNie">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>AGREGAR DEMERITO</h2>
+                <h2 id="modalDemeritoTitulo">AGREGAR DEMERITO</h2>
                 <span class="close" onclick="cerrarModalDemerito()">&times;</span>
             </div>
             
@@ -910,8 +942,16 @@
             </div>
             
             <div class="form-group">
-                <label>Tipo de Demerito:</label>
-                <div class="options-box" id="opcionesDemerito">
+                <label>Tipo:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="tipoNie" value="demerito" checked onchange="actualizarOpcionesNie()"> Demerito</label>
+                    <label><input type="radio" name="tipoNie" value="redencion" onchange="actualizarOpcionesNie()"> Redencion</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Opciones disponibles:</label>
+                <div class="options-box" id="opcionesDemeritoNie">
                     <strong>DEMERITOS:</strong><br>
                     A) No saludar al entrar o salir del aula<br>
                     B) Omitir "Por favor" al hacer una peticion<br>
@@ -936,26 +976,23 @@
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" class="btn btn-success" style="flex: 1;" onclick="guardarDemeritoNie()">Guardar Demerito</button>
+                <button type="button" class="btn btn-success" style="flex: 1;" onclick="guardarRegistroNie()">Guardar</button>
                 <button type="button" class="btn btn-danger" style="flex: 1;" onclick="cerrarModalDemerito()">Cancelar</button>
             </div>
         </div>
     </div>
     
+    <!-- Importar JS config -->
+    <script src="js/config.js"></script>
+    
     <script>
-        // CONFIGURACION DE USUARIOS
-        const USUARIOS = {
-            'admin': { password: 'admin123', rol: 'admin', nombre: 'Administrador' },
-            'registro': { password: 'reg123', rol: 'registro', nombre: 'Registro Academico' },
-            'profe': { password: 'profe123', rol: 'profesor', nombre: 'Profesor' }
-        };
-        
-        // VARIABLES GLOBALES
+        // ==================== VARIABLES GLOBALES ====================
         let registros = [];
         let registroSeleccionado = null;
         let registrosFiltrados = [];
         let usuarioActual = null;
         let estudianteSeleccionadoNie = null;
+        let modoNie = 'demerito'; // 'demerito' o 'redencion'
         
         // CATALOGOS
         const DEMERITOS = {
@@ -976,6 +1013,129 @@
             'B': 'Menciones en Murales Escolares'
         };
         
+        // ==================== API CONFIG ====================
+        const API_URL = window.API_CONFIG ? window.API_CONFIG.baseURL : 'http://localhost/sistema_demeritos/api/';
+        
+        // ==================== FUNCIONES API ====================
+        async function cargarEstudiantesDesdeAPI() {
+            try {
+                document.getElementById('statusMessage').textContent = '🔄 Cargando datos desde MySQL...';
+                
+                const response = await fetch(API_URL + 'get_estudiantes.php');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    registros = data.data.map((est, index) => ({
+                        num: index + 1,
+                        nombre: est.nombre,
+                        nie: est.nie,
+                        sexo: est.sexo,
+                        ano: est.ano,
+                        seccion: est.seccion,
+                        turno: est.turno,
+                        fecha: new Date().toISOString().split('T')[0],
+                        dem_a: '',
+                        dem_b: '',
+                        dem_c: '',
+                        dem_d: '',
+                        red_a: '',
+                        red_b: '',
+                        red_c: '',
+                        rec_a: '',
+                        rec_b: '',
+                        observaciones: '',
+                        id: est.id
+                    }));
+                    
+                    guardarEnLocalStorage();
+                    document.getElementById('statusMessage').textContent = 
+                        `✅ Datos cargados desde MySQL: ${registros.length} estudiantes`;
+                    actualizarTabla();
+                    return true;
+                } else {
+                    if (cargarDesdeLocalStorage()) {
+                        document.getElementById('statusMessage').textContent = 
+                            `📂 Datos cargados desde localStorage: ${registros.length} estudiantes`;
+                        actualizarTabla();
+                        return true;
+                    }
+                    document.getElementById('statusMessage').textContent = '⚠️ No hay datos disponibles';
+                    mostrarSinDatos();
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error al cargar desde API:', error);
+                if (cargarDesdeLocalStorage()) {
+                    document.getElementById('statusMessage').textContent = 
+                        `📂 Datos cargados desde localStorage (fallback): ${registros.length} estudiantes`;
+                    actualizarTabla();
+                    return true;
+                }
+                mostrarSinDatos();
+                return false;
+            }
+        }
+        
+        function mostrarSinDatos() {
+            const tbody = document.getElementById('cuerpoTabla');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="17" class="no-registros">
+                        <div style="font-size: 18px; margin-bottom: 10px;">📭</div>
+                        No hay estudiantes registrados.<br>
+                        <small>Haz clic en "Sincronizar MySQL" para cargar los datos.</small>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // ==================== SINCRONIZAR CON MYSQL ====================
+        async function sincronizarConMySQL() {
+            if (!confirm('¿Deseas sincronizar los datos con MySQL?')) return;
+            
+            try {
+                document.getElementById('statusMessage').textContent = '🔄 Sincronizando con MySQL...';
+                
+                const response = await fetch(API_URL + 'get_estudiantes.php');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    registros = data.data.map((est, index) => ({
+                        num: index + 1,
+                        nombre: est.nombre,
+                        nie: est.nie,
+                        sexo: est.sexo,
+                        ano: est.ano,
+                        seccion: est.seccion,
+                        turno: est.turno,
+                        fecha: new Date().toISOString().split('T')[0],
+                        dem_a: '',
+                        dem_b: '',
+                        dem_c: '',
+                        dem_d: '',
+                        red_a: '',
+                        red_b: '',
+                        red_c: '',
+                        rec_a: '',
+                        rec_b: '',
+                        observaciones: '',
+                        id: est.id
+                    }));
+                    
+                    guardarEnLocalStorage();
+                    actualizarTabla();
+                    alert(`✅ Sincronización completada: ${registros.length} estudiantes`);
+                    document.getElementById('statusMessage').textContent = 
+                        `✅ Sincronizado con MySQL: ${registros.length} estudiantes`;
+                } else {
+                    alert('⚠️ No se encontraron datos en MySQL');
+                }
+            } catch (error) {
+                console.error('Error en sincronización:', error);
+                alert('❌ Error al sincronizar con MySQL. Asegúrate que el servidor esté corriendo.');
+            }
+        }
+        
         // ==================== LOGIN ====================
         function login(event) {
             event.preventDefault();
@@ -985,6 +1145,12 @@
             const rol = document.getElementById('loginRol').value;
             
             const errorDiv = document.getElementById('loginError');
+            
+            const USUARIOS = {
+                'admin': { password: 'admin123', rol: 'admin', nombre: 'Administrador' },
+                'registro': { password: 'reg123', rol: 'registro', nombre: 'Registro Academico' },
+                'profe': { password: 'profe123', rol: 'profesor', nombre: 'Profesor' }
+            };
             
             if (USUARIOS[user] && USUARIOS[user].password === pass && USUARIOS[user].rol === rol) {
                 usuarioActual = {
@@ -1020,14 +1186,7 @@
             }
             
             configurarPermisos();
-            
-            if (!cargarDesdeLocalStorage()) {
-                cargarDatosEjemplo();
-            } else {
-                actualizarTabla();
-            }
-            
-            document.getElementById('statusMessage').textContent = 'Sistema listo - Bachillerato 1°, 2° y 3° Año';
+            cargarEstudiantesDesdeAPI();
         }
         
         function logout() {
@@ -1043,97 +1202,61 @@
         function configurarPermisos() {
             const rol = usuarioActual.rol;
             
-            document.getElementById('btnNuevo').style.display = (rol === 'admin' || rol === 'registro') ? 'inline-block' : 'none';
-            document.getElementById('btnEliminar').style.display = (rol === 'admin' || rol === 'registro') ? 'inline-block' : 'none';
+            // Buscador NIE solo para profesores
             document.getElementById('buscadorNie').style.display = (rol === 'profesor') ? 'flex' : 'none';
-            document.querySelector('.filter-group').style.display = 'flex';
-            document.querySelector('.btn-warning').style.display = 'inline-block';
-            document.querySelector('.btn-info').style.display = 'inline-block';
-            document.getElementById('statsContainer').style.display = 'grid';
+            
+            // Si es profesor, solo mostrar Demérito y Redención en el modal de NIE
+            if (rol === 'profesor') {
+                // Ocultar el radio de Reconocimiento en el modal de NIE
+                const radiosNie = document.querySelectorAll('input[name="tipoNie"]');
+                radiosNie.forEach(r => {
+                    if (r.value === 'reconocimiento') {
+                        r.parentElement.style.display = 'none';
+                    }
+                });
+            } else {
+                // Mostrar todos los tipos para admin y registro
+                const radiosNie = document.querySelectorAll('input[name="tipoNie"]');
+                radiosNie.forEach(r => {
+                    r.parentElement.style.display = 'inline-block';
+                });
+            }
         }
         
-        // ==================== DATOS ====================
-        function cargarDatosEjemplo() {
-            registros = [
-                {
-                    num: 1,
-                    nombre: 'MARIA GONZALEZ',
-                    nie: '123456',
-                    sexo: 'Mujer',
-                    ano: '1°',
-                    seccion: 'A',
-                    turno: 'Matutino',
-                    fecha: '2026-06-23',
-                    dem_a: 'X',
-                    dem_b: '',
-                    dem_c: '',
-                    dem_d: '',
-                    red_a: '',
-                    red_b: '',
-                    red_c: '',
-                    rec_a: '',
-                    rec_b: '',
-                    observaciones: ''
-                },
-                {
-                    num: 2,
-                    nombre: 'CARLOS PEREZ',
-                    nie: '789012',
-                    sexo: 'Hombre',
-                    ano: '2°',
-                    seccion: 'B',
-                    turno: 'Vespertino',
-                    fecha: '2026-06-22',
-                    dem_a: '',
-                    dem_b: '',
-                    dem_c: '',
-                    dem_d: '',
-                    red_a: 'X',
-                    red_b: '',
-                    red_c: '',
-                    rec_a: '',
-                    rec_b: '',
-                    observaciones: ''
-                },
-                {
-                    num: 3,
-                    nombre: 'ANA MARTINEZ',
-                    nie: '345678',
-                    sexo: 'Mujer',
-                    ano: '3°',
-                    seccion: 'C',
-                    turno: 'Matutino',
-                    fecha: '2026-06-21',
-                    dem_a: '',
-                    dem_b: '',
-                    dem_c: '',
-                    dem_d: '',
-                    red_a: '',
-                    red_b: '',
-                    red_c: '',
-                    rec_a: 'X',
-                    rec_b: '',
-                    observaciones: ''
+        // ==================== LOCAL STORAGE ====================
+        function guardarEnLocalStorage() {
+            try {
+                localStorage.setItem('registrosBachillerato', JSON.stringify(registros));
+            } catch (e) {
+                console.log('No se pudo guardar en localStorage');
+            }
+        }
+        
+        function cargarDesdeLocalStorage() {
+            try {
+                const data = localStorage.getItem('registrosBachillerato');
+                if (data) {
+                    registros = JSON.parse(data);
+                    return true;
                 }
-            ];
-            actualizarTabla();
+            } catch (e) {
+                console.log('No se pudo cargar desde localStorage');
+            }
+            return false;
         }
         
-        function formatearFecha(fecha) {
-            if (!fecha) return '';
-            const partes = fecha.split('-');
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
-        }
-        
+        // ==================== TABLA ====================
         function actualizarTabla() {
             const tbody = document.getElementById('cuerpoTabla');
             tbody.innerHTML = '';
             
             const filtroAno = document.getElementById('filtroAno').value;
+            const filtroSeccion = document.getElementById('filtroSeccion').value;
             const filtroTipo = document.getElementById('filtroTipo').value;
             
             registrosFiltrados = registros.filter(reg => {
                 if (filtroAno !== 'todos' && reg.ano !== filtroAno) return false;
+                if (filtroSeccion !== 'todos' && reg.seccion !== filtroSeccion) return false;
                 
                 if (filtroTipo !== 'todos') {
                     const esDemerito = reg.dem_a || reg.dem_b || reg.dem_c || reg.dem_d;
@@ -1154,21 +1277,16 @@
                 return;
             }
             
-            let totalDem = 0, totalRed = 0, totalRec = 0;
-            
             registrosFiltrados.forEach((reg, index) => {
                 const tr = document.createElement('tr');
                 
                 let tipo = '';
                 if (reg.dem_a || reg.dem_b || reg.dem_c || reg.dem_d) {
                     tipo = 'demerito';
-                    totalDem++;
                 } else if (reg.red_a || reg.red_b || reg.red_c) {
                     tipo = 'redencion';
-                    totalRed++;
                 } else if (reg.rec_a || reg.rec_b) {
                     tipo = 'reconocimiento';
-                    totalRec++;
                 }
                 
                 if (tipo) tr.className = tipo;
@@ -1199,29 +1317,62 @@
                     tr.appendChild(td);
                 });
                 
+                // AL HACER CLIC EN UNA FILA: cargar NIE en el buscador
                 tr.onclick = function() {
-                    const filas = document.querySelectorAll('#cuerpoTabla tr');
-                    filas.forEach(f => f.style.background = '');
+                    // Quitar selección anterior
+                    document.querySelectorAll('#cuerpoTabla tr').forEach(f => {
+                        f.style.background = '';
+                    });
                     this.style.background = '#d4edda';
+                    
+                    // Guardar referencia del registro seleccionado
                     registroSeleccionado = registros.indexOf(reg);
+                    
+                    // Cargar el NIE en el campo de búsqueda
+                    const inputNie = document.getElementById('inputNie');
+                    if (inputNie) {
+                        inputNie.value = reg.nie;
+                        // Disparar la búsqueda automáticamente
+                        buscarPorNie();
+                    }
                 };
                 
                 tbody.appendChild(tr);
             });
             
             actualizarEstadisticas();
-            document.getElementById('filtroMessage').textContent = `Mostrando: ${registrosFiltrados.length} de ${registros.length} registros`;
+            document.getElementById('filtroMessage').textContent = 
+                `Mostrando: ${registrosFiltrados.length} de ${registros.length} registros`;
+        }
+        
+        function formatearFecha(fecha) {
+            if (!fecha) return '';
+            const partes = fecha.split('-');
+            return `${partes[2]}/${partes[1]}/${partes[0]}`;
         }
         
         function actualizarEstadisticas() {
-            const total = registros.length;
-            const demeritos = registros.filter(r => r.dem_a || r.dem_b || r.dem_c || r.dem_d).length;
-            const redenciones = registros.filter(r => r.red_a || r.red_b || r.red_c).length;
-            const reconocimientos = registros.filter(r => r.rec_a || r.rec_b).length;
+            // Obtener filtros actuales
+            const filtroAno = document.getElementById('filtroAno').value;
+            const filtroSeccion = document.getElementById('filtroSeccion').value;
             
-            const total1Ano = registros.filter(r => r.ano === '1°').length;
-            const total2Ano = registros.filter(r => r.ano === '2°').length;
-            const total3Ano = registros.filter(r => r.ano === '3°').length;
+            // Filtrar datos para estadísticas
+            let datosEstadistica = registros;
+            if (filtroAno !== 'todos') {
+                datosEstadistica = datosEstadistica.filter(r => r.ano === filtroAno);
+            }
+            if (filtroSeccion !== 'todos') {
+                datosEstadistica = datosEstadistica.filter(r => r.seccion === filtroSeccion);
+            }
+            
+            const total = datosEstadistica.length;
+            const demeritos = datosEstadistica.filter(r => r.dem_a || r.dem_b || r.dem_c || r.dem_d).length;
+            const redenciones = datosEstadistica.filter(r => r.red_a || r.red_b || r.red_c).length;
+            const reconocimientos = datosEstadistica.filter(r => r.rec_a || r.rec_b).length;
+            
+            const total1Ano = datosEstadistica.filter(r => r.ano === '1°').length;
+            const total2Ano = datosEstadistica.filter(r => r.ano === '2°').length;
+            const total3Ano = datosEstadistica.filter(r => r.ano === '3°').length;
             
             document.getElementById('totalRegistros').textContent = total;
             document.getElementById('totalDemeritos').textContent = demeritos;
@@ -1231,6 +1382,16 @@
             document.getElementById('total2Ano').textContent = total2Ano;
             document.getElementById('total3Ano').textContent = total3Ano;
             document.getElementById('totalMessage').textContent = `Total registros: ${total}`;
+            
+            // Resaltar tarjetas según filtro
+            document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
+            if (filtroSeccion !== 'todos') {
+                document.querySelectorAll('.stat-card').forEach(card => {
+                    if (card.querySelector('.stat-label')?.textContent.includes('Estudiantes')) {
+                        card.classList.add('active');
+                    }
+                });
+            }
         }
         
         function aplicarFiltros() {
@@ -1251,25 +1412,48 @@
             const estudiante = registros.find(r => r.nie === nie);
             
             if (estudiante) {
-                resultado.textContent = `Encontrado: ${estudiante.nombre} - ${estudiante.ano}° "${estudiante.seccion}"`;
+                resultado.textContent = `✅ Encontrado: ${estudiante.nombre} - ${estudiante.ano}° "${estudiante.seccion}"`;
                 estudianteSeleccionadoNie = estudiante;
             } else {
-                resultado.textContent = 'Estudiante no encontrado';
+                resultado.textContent = '❌ Estudiante no encontrado';
                 estudianteSeleccionadoNie = null;
             }
         }
         
+        // ==================== AGREGAR DEMERITO / REDENCION POR NIE ====================
         function agregarDemeritoPorNie() {
+            modoNie = 'demerito';
+            abrirModalNie();
+        }
+        
+        function agregarRedencionPorNie() {
+            modoNie = 'redencion';
+            abrirModalNie();
+        }
+        
+        function abrirModalNie() {
             if (!estudianteSeleccionadoNie) {
-                alert('Primero busque un estudiante por NIE');
+                alert('⚠️ Primero busque un estudiante por NIE');
                 return;
             }
             
+            // Actualizar información del estudiante
             document.getElementById('demEstudiante').textContent = estudianteSeleccionadoNie.nombre;
             document.getElementById('demAno').textContent = estudianteSeleccionadoNie.ano;
             document.getElementById('demSeccion').textContent = estudianteSeleccionadoNie.seccion;
             
-            // Fecha actual en formato YYYY-MM-DD para el input date
+            // Seleccionar el tipo según el botón presionado
+            const radios = document.querySelectorAll('input[name="tipoNie"]');
+            radios.forEach(r => {
+                r.checked = (r.value === modoNie);
+            });
+            
+            // Actualizar título y opciones
+            document.getElementById('modalDemeritoTitulo').textContent = 
+                modoNie === 'demerito' ? 'AGREGAR DEMERITO' : 'AGREGAR REDENCION';
+            actualizarOpcionesNie();
+            
+            // Fecha actual
             const hoy = new Date();
             const fechaFormateada = hoy.getFullYear() + '-' + 
                                    String(hoy.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -1282,13 +1466,39 @@
             document.getElementById('modalDemeritoNie').style.display = 'flex';
         }
         
-        function guardarDemeritoNie() {
+        function actualizarOpcionesNie() {
+            const tipo = document.querySelector('input[name="tipoNie"]:checked').value;
+            const container = document.getElementById('opcionesDemeritoNie');
+            let html = '';
+            
+            if (tipo === 'demerito') {
+                html = '<strong>DEMERITOS:</strong><br>';
+                for (const [key, value] of Object.entries(DEMERITOS)) {
+                    html += `  ${key}) ${value}<br>`;
+                }
+            } else if (tipo === 'redencion') {
+                html = '<strong>REDENCIONES:</strong><br>';
+                for (const [key, value] of Object.entries(REDENCIONES)) {
+                    html += `  ${key}) ${value}<br>`;
+                }
+            } else {
+                html = '<strong>RECONOCIMIENTOS:</strong><br>';
+                for (const [key, value] of Object.entries(RECONOCIMIENTOS)) {
+                    html += `  ${key}) ${value}<br>`;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function guardarRegistroNie() {
+            const tipo = document.querySelector('input[name="tipoNie"]:checked').value;
             const letras = document.getElementById('demLetras').value.trim().toUpperCase();
             const fecha = document.getElementById('demFecha').value;
             const observaciones = document.getElementById('demObservaciones').value.trim();
             
             if (!letras) {
-                alert('Seleccione al menos un demerito');
+                alert('Seleccione al menos una opción');
                 return;
             }
             
@@ -1300,9 +1510,23 @@
             const registro = registros.find(r => r.nie === estudianteSeleccionadoNie.nie);
             
             if (registro) {
-                for (const letra of letras) {
-                    if (DEMERITOS[letra]) {
-                        registro[`dem_${letra.toLowerCase()}`] = 'X';
+                if (tipo === 'demerito') {
+                    for (const letra of letras) {
+                        if (DEMERITOS[letra]) {
+                            registro[`dem_${letra.toLowerCase()}`] = 'X';
+                        }
+                    }
+                } else if (tipo === 'redencion') {
+                    for (const letra of letras) {
+                        if (REDENCIONES[letra]) {
+                            registro[`red_${letra.toLowerCase()}`] = 'X';
+                        }
+                    }
+                } else {
+                    for (const letra of letras) {
+                        if (RECONOCIMIENTOS[letra]) {
+                            registro[`rec_${letra.toLowerCase()}`] = 'X';
+                        }
                     }
                 }
                 registro.fecha = fecha;
@@ -1311,7 +1535,7 @@
                 guardarEnLocalStorage();
                 actualizarTabla();
                 cerrarModalDemerito();
-                alert('Demerito agregado correctamente');
+                alert(`✅ ${tipo.toUpperCase()} agregado correctamente`);
             }
         }
         
@@ -1322,17 +1546,16 @@
             document.getElementById('resultadoNie').textContent = '';
         }
         
-        // ==================== MODAL ====================
+        // ==================== MODAL NUEVO REGISTRO ====================
         function abrirModal() {
             if (usuarioActual.rol === 'profesor') {
-                alert('Los profesores solo pueden agregar demeritos buscando por NIE');
+                alert('Los profesores solo pueden agregar deméritos o redenciones buscando por NIE');
                 return;
             }
             
             document.getElementById('modalRegistro').style.display = 'flex';
             document.getElementById('formRegistro').reset();
             
-            // Fecha actual en formato YYYY-MM-DD para el input date
             const hoy = new Date();
             const fechaFormateada = hoy.getFullYear() + '-' + 
                                    String(hoy.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -1458,7 +1681,7 @@
             guardarEnLocalStorage();
             actualizarTabla();
             cerrarModal();
-            alert(`Registro guardado exitosamente. Total: ${registros.length} registros`);
+            alert(`✅ Registro guardado exitosamente. Total: ${registros.length} registros`);
         }
         
         // ==================== ELIMINAR ====================
@@ -1486,24 +1709,40 @@
         
         // ==================== ESTADISTICAS ====================
         function mostrarEstadisticas() {
-            const total = registros.length;
-            const demeritos = registros.filter(r => r.dem_a || r.dem_b || r.dem_c || r.dem_d).length;
-            const redenciones = registros.filter(r => r.red_a || r.red_b || r.red_c).length;
-            const reconocimientos = registros.filter(r => r.rec_a || r.rec_b).length;
+            const filtroAno = document.getElementById('filtroAno').value;
+            const filtroSeccion = document.getElementById('filtroSeccion').value;
             
-            const total1Ano = registros.filter(r => r.ano === '1°').length;
-            const total2Ano = registros.filter(r => r.ano === '2°').length;
-            const total3Ano = registros.filter(r => r.ano === '3°').length;
+            let datosEstadistica = registros;
+            let filtroTexto = '';
+            
+            if (filtroAno !== 'todos') {
+                datosEstadistica = datosEstadistica.filter(r => r.ano === filtroAno);
+                filtroTexto += ` ${filtroAno}`;
+            }
+            if (filtroSeccion !== 'todos') {
+                datosEstadistica = datosEstadistica.filter(r => r.seccion === filtroSeccion);
+                filtroTexto += ` Sección ${filtroSeccion}`;
+            }
+            
+            const total = datosEstadistica.length;
+            const demeritos = datosEstadistica.filter(r => r.dem_a || r.dem_b || r.dem_c || r.dem_d).length;
+            const redenciones = datosEstadistica.filter(r => r.red_a || r.red_b || r.red_c).length;
+            const reconocimientos = datosEstadistica.filter(r => r.rec_a || r.rec_b).length;
+            
+            const total1Ano = datosEstadistica.filter(r => r.ano === '1°').length;
+            const total2Ano = datosEstadistica.filter(r => r.ano === '2°').length;
+            const total3Ano = datosEstadistica.filter(r => r.ano === '3°').length;
             
             const mensaje = 
-                'ESTADISTICAS DEL SISTEMA\n' +
+                '📊 ESTADISTICAS DEL SISTEMA\n' +
                 '─────────────────────────────\n' +
-                `Total de registros: ${total}\n\n` +
+                (filtroTexto ? `Filtro aplicado:${filtroTexto}\n` : '') +
+                `Total de estudiantes: ${total}\n\n` +
                 'POR AÑO:\n' +
                 `  1° Año: ${total1Ano} (${total > 0 ? (total1Ano/total*100).toFixed(1) : 0}%)\n` +
                 `  2° Año: ${total2Ano} (${total > 0 ? (total2Ano/total*100).toFixed(1) : 0}%)\n` +
                 `  3° Año: ${total3Ano} (${total > 0 ? (total3Ano/total*100).toFixed(1) : 0}%)\n\n` +
-                'POR TIPO:\n' +
+                'POR TIPO DE REGISTRO:\n' +
                 `  Demeritos: ${demeritos} (${total > 0 ? (demeritos/total*100).toFixed(1) : 0}%)\n` +
                 `  Redenciones: ${redenciones} (${total > 0 ? (redenciones/total*100).toFixed(1) : 0}%)\n` +
                 `  Reconocimientos: ${reconocimientos} (${total > 0 ? (reconocimientos/total*100).toFixed(1) : 0}%)`;
@@ -1536,29 +1775,7 @@
             link.click();
             document.body.removeChild(link);
             
-            alert('Archivo exportado correctamente');
-        }
-        
-        // ==================== LOCAL STORAGE ====================
-        function guardarEnLocalStorage() {
-            try {
-                localStorage.setItem('registrosBachillerato', JSON.stringify(registros));
-            } catch (e) {
-                console.log('No se pudo guardar en localStorage');
-            }
-        }
-        
-        function cargarDesdeLocalStorage() {
-            try {
-                const data = localStorage.getItem('registrosBachillerato');
-                if (data) {
-                    registros = JSON.parse(data);
-                    return true;
-                }
-            } catch (e) {
-                console.log('No se pudo cargar desde localStorage');
-            }
-            return false;
+            alert('✅ Archivo exportado correctamente');
         }
         
         // ==================== INICIALIZACION ====================
