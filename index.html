@@ -264,7 +264,6 @@
 
         <!-- TOOLBAR con botones y filtros -->
         <div class="toolbar">
-            <!-- Botón MÉRITOS (filtra por reconocimientos) -->
             <button class="btn btn-success" onclick="filtrarMeritos()">⭐ Méritos</button>
             <button class="btn btn-warning" onclick="mostrarEstadisticas()">📊 Estadísticas</button>
             <div class="filter-group">
@@ -308,7 +307,6 @@
             <div class="btn-group">
                 <button class="btn btn-danger" onclick="agregarDemeritoPorNie()">Agregar Demérito</button>
                 <button class="btn btn-info" onclick="agregarRedencionPorNie()">Agregar Redención</button>
-                <!-- 🆕 NUEVO BOTÓN: Agregar Mérito -->
                 <button class="btn btn-success" onclick="agregarMeritoPorNie()">⭐ Agregar Mérito</button>
             </div>
         </div>
@@ -387,7 +385,7 @@
         </div>
     </div>
 
-    <!-- MODAL NUEVO REGISTRO (igual) -->
+    <!-- MODAL NUEVO REGISTRO -->
     <div class="modal" id="modalRegistro">
         <div class="modal-content">
             <div class="modal-header">
@@ -395,7 +393,6 @@
                 <span class="close" onclick="cerrarModal()">&times;</span>
             </div>
             <form id="formRegistro">
-                <!-- ... (mismo contenido que antes) ... -->
                 <div class="form-group">
                     <label>Nombre completo del estudiante:</label>
                     <input type="text" id="nombre" required placeholder="Ej: Maria Jose Perez">
@@ -852,49 +849,100 @@
             }
         }
 
+        // ==================== NUEVA FUNCIÓN MOSTRAR ESTADÍSTICAS (REPORTE DETALLADO) ====================
         function mostrarEstadisticas() {
             const filtroAno = document.getElementById('filtroAno').value;
             const filtroSeccion = document.getElementById('filtroSeccion').value;
             const filtroSexo = document.getElementById('filtroSexo').value;
             const filtroTipo = document.getElementById('filtroTipo').value;
 
-            let datosFiltrados = registros;
-            let filtroTexto = '';
-            if (filtroAno !== 'todos') { datosFiltrados = datosFiltrados.filter(r => r.ano === filtroAno); filtroTexto += ` ${filtroAno}`; }
-            if (filtroSeccion !== 'todos') { datosFiltrados = datosFiltrados.filter(r => r.seccion === filtroSeccion); filtroTexto += ` Sección ${filtroSeccion}`; }
-            if (filtroSexo !== 'todos') { datosFiltrados = datosFiltrados.filter(r => r.sexo === filtroSexo); filtroTexto += ` (${filtroSexo})`; }
+            // 1. Filtrar estudiantes por año, sección, sexo
+            let estudiantesFiltrados = registros.filter(reg => {
+                if (filtroAno !== 'todos' && reg.ano !== filtroAno) return false;
+                if (filtroSeccion !== 'todos' && reg.seccion !== filtroSeccion) return false;
+                if (filtroSexo !== 'todos' && reg.sexo !== filtroSexo) return false;
+                return true;
+            });
 
-            const totalBase = datosFiltrados.length;
-            const conDemerito = datosFiltrados.filter(r => r.dem_a || r.dem_b || r.dem_c || r.dem_d);
-            const conRedencion = datosFiltrados.filter(r => r.red_a || r.red_b || r.red_c);
-            const conReconocimiento = datosFiltrados.filter(r => r.rec_a || r.rec_b);
+            // 2. Si hay filtro de tipo, quedarnos solo con los que tienen ese tipo de registro
+            if (filtroTipo === 'demerito') {
+                estudiantesFiltrados = estudiantesFiltrados.filter(reg => 
+                    reg.dem_a || reg.dem_b || reg.dem_c || reg.dem_d
+                );
+            } else if (filtroTipo === 'redencion') {
+                estudiantesFiltrados = estudiantesFiltrados.filter(reg => 
+                    reg.red_a || reg.red_b || reg.red_c
+                );
+            } else if (filtroTipo === 'reconocimiento') {
+                estudiantesFiltrados = estudiantesFiltrados.filter(reg => 
+                    reg.rec_a || reg.rec_b
+                );
+            }
 
-            let datosMostrar = datosFiltrados;
-            let tipoTexto = '';
-            if (filtroTipo === 'demerito') { datosMostrar = conDemerito; tipoTexto = ' (solo con deméritos)'; }
-            else if (filtroTipo === 'redencion') { datosMostrar = conRedencion; tipoTexto = ' (solo con redenciones)'; }
-            else if (filtroTipo === 'reconocimiento') { datosMostrar = conReconocimiento; tipoTexto = ' (solo con reconocimientos)'; }
+            // 3. Construir reporte
+            let reporte = '📊 REPORTE DETALLADO DE ESTUDIANTES\n';
+            reporte += '─────────────────────────────────────────────\n\n';
 
-            const totalMostrado = datosMostrar.length;
-            const total1Ano = datosMostrar.filter(r => r.ano === '1°').length;
-            const total2Ano = datosMostrar.filter(r => r.ano === '2°').length;
-            const total3Ano = datosMostrar.filter(r => r.ano === '3°').length;
+            if (estudiantesFiltrados.length === 0) {
+                reporte += 'No hay estudiantes que coincidan con los filtros.';
+                alert(reporte);
+                return;
+            }
 
-            let mensaje = '📊 ESTADISTICAS DEL SISTEMA\n';
-            mensaje += '─────────────────────────────\n';
-            mensaje += (filtroTexto ? `Filtro aplicado:${filtroTexto}${tipoTexto}\n` : `Todos los estudiantes${tipoTexto}\n`);
-            mensaje += `\nEstudiantes en el filtro base: ${totalBase}\n`;
-            mensaje += `Estudiantes mostrados (según tipo): ${totalMostrado}\n\n`;
-            mensaje += 'POR TIPO DE REGISTRO (sobre el filtro base):\n';
-            mensaje += `  Con Deméritos: ${conDemerito.length} (${totalBase > 0 ? (conDemerito.length/totalBase*100).toFixed(1) : 0}%)\n`;
-            mensaje += `  Con Redenciones: ${conRedencion.length} (${totalBase > 0 ? (conRedencion.length/totalBase*100).toFixed(1) : 0}%)\n`;
-            mensaje += `  Con Reconocimientos: ${conReconocimiento.length} (${totalBase > 0 ? (conReconocimiento.length/totalBase*100).toFixed(1) : 0}%)\n\n`;
-            mensaje += 'POR AÑO (sobre los mostrados):\n';
-            mensaje += `  1° Año: ${total1Ano} (${totalMostrado > 0 ? (total1Ano/totalMostrado*100).toFixed(1) : 0}%)\n`;
-            mensaje += `  2° Año: ${total2Ano} (${totalMostrado > 0 ? (total2Ano/totalMostrado*100).toFixed(1) : 0}%)\n`;
-            mensaje += `  3° Año: ${total3Ano} (${totalMostrado > 0 ? (total3Ano/totalMostrado*100).toFixed(1) : 0}%)\n`;
+            estudiantesFiltrados.forEach((est, idx) => {
+                reporte += `${idx+1}. ${est.nombre} (NIE: ${est.nie})\n`;
+                reporte += `   Año: ${est.ano} | Sección: ${est.seccion} | Sexo: ${est.sexo}\n`;
+                reporte += `   Fecha último registro: ${formatearFecha(est.fecha) || 'No registrada'}\n`;
 
-            alert(mensaje);
+                // Deméritos
+                let demLetras = [];
+                if (est.dem_a) demLetras.push('A');
+                if (est.dem_b) demLetras.push('B');
+                if (est.dem_c) demLetras.push('C');
+                if (est.dem_d) demLetras.push('D');
+                if (demLetras.length > 0) {
+                    let descs = demLetras.map(l => `${l}) ${DEMERITOS[l]}`).join('; ');
+                    reporte += `   Deméritos: ${descs}\n`;
+                } else {
+                    reporte += `   Deméritos: Ninguno\n`;
+                }
+
+                // Redenciones
+                let redLetras = [];
+                if (est.red_a) redLetras.push('A');
+                if (est.red_b) redLetras.push('B');
+                if (est.red_c) redLetras.push('C');
+                if (redLetras.length > 0) {
+                    let descs = redLetras.map(l => `${l}) ${REDENCIONES[l]}`).join('; ');
+                    reporte += `   Redenciones: ${descs}\n`;
+                } else {
+                    reporte += `   Redenciones: Ninguna\n`;
+                }
+
+                // Reconocimientos (Méritos)
+                let recLetras = [];
+                if (est.rec_a) recLetras.push('A');
+                if (est.rec_b) recLetras.push('B');
+                if (recLetras.length > 0) {
+                    let descs = recLetras.map(l => `${l}) ${RECONOCIMIENTOS[l]}`).join('; ');
+                    reporte += `   Méritos: ${descs}\n`;
+                } else {
+                    reporte += `   Méritos: Ninguno\n`;
+                }
+
+                // Observaciones
+                reporte += `   Observaciones: ${est.observaciones || 'Sin observaciones'}\n`;
+                reporte += `   ─────────────────────────────────────────────\n`;
+            });
+
+            // Mostrar en alert (si es muy largo, abrir nueva ventana)
+            if (reporte.length > 2000) {
+                const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+                win.document.write(`<pre style="font-family:monospace;font-size:14px;padding:20px;">${reporte}</pre>`);
+                win.document.close();
+            } else {
+                alert(reporte);
+            }
         }
 
         function aplicarFiltros() {
