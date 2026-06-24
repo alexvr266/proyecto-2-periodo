@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Registro de Deméritos - Bachillerato</title>
     <style>
-        /* ========== ESTILOS (los mismos que ya tenías) ========== */
+        /* ========== ESTILOS (mismos de antes) ========== */
         * {
             margin: 0;
             padding: 0;
@@ -262,8 +262,10 @@
             </div>
         </div>
 
-        <!-- TOOLBAR -->
+        <!-- TOOLBAR con botones y filtros -->
         <div class="toolbar">
+            <!-- Botón MÉRITOS (filtra por reconocimientos) -->
+            <button class="btn btn-success" onclick="filtrarMeritos()">⭐ Méritos</button>
             <button class="btn btn-warning" onclick="mostrarEstadisticas()">📊 Estadísticas</button>
             <div class="filter-group">
                 <label>Año:</label>
@@ -282,6 +284,12 @@
                     <option value="D">D</option>
                     <option value="E">E</option>
                 </select>
+                <label>Sexo:</label>
+                <select id="filtroSexo" onchange="aplicarFiltros()">
+                    <option value="todos">Todos</option>
+                    <option value="Mujer">Mujer</option>
+                    <option value="Hombre">Hombre</option>
+                </select>
                 <label>Tipo:</label>
                 <select id="filtroTipo" onchange="aplicarFiltros()">
                     <option value="todos">Todos</option>
@@ -298,8 +306,10 @@
             <input type="text" id="inputNie" placeholder="Ingrese el NIE del estudiante" onkeyup="buscarPorNie()">
             <span id="resultadoNie" class="resultado"></span>
             <div class="btn-group">
-                <button class="btn btn-success" onclick="agregarDemeritoPorNie()">Agregar Demérito</button>
-                <button class="btn btn-info" onclick="agregarRedencionPorNie()" id="btnRedencionNie">Agregar Redención</button>
+                <button class="btn btn-danger" onclick="agregarDemeritoPorNie()">Agregar Demérito</button>
+                <button class="btn btn-info" onclick="agregarRedencionPorNie()">Agregar Redención</button>
+                <!-- 🆕 NUEVO BOTÓN: Agregar Mérito -->
+                <button class="btn btn-success" onclick="agregarMeritoPorNie()">⭐ Agregar Mérito</button>
             </div>
         </div>
 
@@ -377,7 +387,7 @@
         </div>
     </div>
 
-    <!-- MODAL NUEVO REGISTRO -->
+    <!-- MODAL NUEVO REGISTRO (igual) -->
     <div class="modal" id="modalRegistro">
         <div class="modal-content">
             <div class="modal-header">
@@ -385,6 +395,7 @@
                 <span class="close" onclick="cerrarModal()">&times;</span>
             </div>
             <form id="formRegistro">
+                <!-- ... (mismo contenido que antes) ... -->
                 <div class="form-group">
                     <label>Nombre completo del estudiante:</label>
                     <input type="text" id="nombre" required placeholder="Ej: Maria Jose Perez">
@@ -484,7 +495,7 @@
         </div>
     </div>
 
-    <!-- MODAL DEMERITO / REDENCION POR NIE -->
+    <!-- MODAL DEMERITO / REDENCION / MÉRITO POR NIE -->
     <div class="modal" id="modalDemeritoNie">
         <div class="modal-content">
             <div class="modal-header">
@@ -526,9 +537,8 @@
         let registrosFiltrados = [];
         let usuarioActual = null;
         let estudianteSeleccionadoNie = null;
-        let modoNie = 'demerito'; // 'demerito' o 'redencion'
+        let modoNie = 'demerito'; // 'demerito', 'redencion' o 'reconocimiento'
 
-        // CATALOGOS
         const DEMERITOS = {
             'A': 'No saludar al entrar o salir del aula',
             'B': 'Omitir "Por favor" al hacer una peticion',
@@ -545,7 +555,6 @@
             'B': 'Menciones en Murales Escolares'
         };
 
-        // ==================== API CONFIG ====================
         const API_URL = window.API_CONFIG ? window.API_CONFIG.baseURL : 'http://localhost/sistema_demeritos/api/';
 
         // ==================== FUNCIONES API ====================
@@ -556,7 +565,6 @@
                 const data = await response.json();
 
                 if (data.success && data.data.length > 0) {
-                    // Los datos ya vienen con los campos dem_a, dem_b, etc. desde el backend
                     registros = data.data.map((est, index) => ({
                         num: index + 1,
                         nombre: est.nombre,
@@ -621,7 +629,6 @@
             `;
         }
 
-        // ==================== SINCRONIZAR CON MYSQL ====================
         async function sincronizarConMySQL() {
             if (!confirm('¿Deseas sincronizar los datos con MySQL?')) return;
             await cargarEstudiantesDesdeAPI();
@@ -702,23 +709,23 @@
             return false;
         }
 
-        // ==================== TABLA ====================
+        // ==================== TABLA Y FILTROS ====================
         function actualizarTabla() {
             const tbody = document.getElementById('cuerpoTabla');
             tbody.innerHTML = '';
 
             const filtroAno = document.getElementById('filtroAno').value;
             const filtroSeccion = document.getElementById('filtroSeccion').value;
+            const filtroSexo = document.getElementById('filtroSexo').value;
             const filtroTipo = document.getElementById('filtroTipo').value;
 
-            // Filtro base (año y sección)
             let datosFiltrados = registros.filter(reg => {
                 if (filtroAno !== 'todos' && reg.ano !== filtroAno) return false;
                 if (filtroSeccion !== 'todos' && reg.seccion !== filtroSeccion) return false;
+                if (filtroSexo !== 'todos' && reg.sexo !== filtroSexo) return false;
                 return true;
             });
 
-            // Filtro de tipo (para la tabla)
             if (filtroTipo === 'demerito') {
                 datosFiltrados = datosFiltrados.filter(reg => 
                     reg.dem_a || reg.dem_b || reg.dem_c || reg.dem_d
@@ -804,11 +811,13 @@
         function actualizarEstadisticas() {
             const filtroAno = document.getElementById('filtroAno').value;
             const filtroSeccion = document.getElementById('filtroSeccion').value;
+            const filtroSexo = document.getElementById('filtroSexo').value;
             const filtroTipo = document.getElementById('filtroTipo').value;
 
             let datosFiltrados = registros;
             if (filtroAno !== 'todos') datosFiltrados = datosFiltrados.filter(r => r.ano === filtroAno);
             if (filtroSeccion !== 'todos') datosFiltrados = datosFiltrados.filter(r => r.seccion === filtroSeccion);
+            if (filtroSexo !== 'todos') datosFiltrados = datosFiltrados.filter(r => r.sexo === filtroSexo);
 
             const totalBase = datosFiltrados.length;
             const conDemerito = datosFiltrados.filter(r => r.dem_a || r.dem_b || r.dem_c || r.dem_d);
@@ -834,7 +843,7 @@
             document.getElementById('totalMessage').textContent = `Total estudiantes: ${totalBase} | Mostrando: ${datosMostrar.length}`;
 
             document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
-            if (filtroSeccion !== 'todos') {
+            if (filtroSeccion !== 'todos' || filtroSexo !== 'todos') {
                 document.querySelectorAll('.stat-card').forEach(card => {
                     if (card.querySelector('.stat-label')?.textContent.includes('Total')) {
                         card.classList.add('active');
@@ -846,12 +855,14 @@
         function mostrarEstadisticas() {
             const filtroAno = document.getElementById('filtroAno').value;
             const filtroSeccion = document.getElementById('filtroSeccion').value;
+            const filtroSexo = document.getElementById('filtroSexo').value;
             const filtroTipo = document.getElementById('filtroTipo').value;
 
             let datosFiltrados = registros;
             let filtroTexto = '';
             if (filtroAno !== 'todos') { datosFiltrados = datosFiltrados.filter(r => r.ano === filtroAno); filtroTexto += ` ${filtroAno}`; }
             if (filtroSeccion !== 'todos') { datosFiltrados = datosFiltrados.filter(r => r.seccion === filtroSeccion); filtroTexto += ` Sección ${filtroSeccion}`; }
+            if (filtroSexo !== 'todos') { datosFiltrados = datosFiltrados.filter(r => r.sexo === filtroSexo); filtroTexto += ` (${filtroSexo})`; }
 
             const totalBase = datosFiltrados.length;
             const conDemerito = datosFiltrados.filter(r => r.dem_a || r.dem_b || r.dem_c || r.dem_d);
@@ -890,6 +901,12 @@
             actualizarTabla();
         }
 
+        // ==================== BOTÓN MÉRITOS ====================
+        function filtrarMeritos() {
+            document.getElementById('filtroTipo').value = 'reconocimiento';
+            aplicarFiltros();
+        }
+
         // ==================== BUSCADOR POR NIE ====================
         function buscarPorNie() {
             const nie = document.getElementById('inputNie').value.trim();
@@ -911,29 +928,53 @@
             }
         }
 
-        // ==================== AGREGAR DEMERITO / REDENCION POR NIE ====================
+        // ==================== AGREGAR DEMERITO / REDENCION / MÉRITO ====================
         function agregarDemeritoPorNie() {
+            if (!estudianteSeleccionadoNie) {
+                alert('⚠️ Primero busque un estudiante por NIE');
+                return;
+            }
             modoNie = 'demerito';
             abrirModalNie();
         }
 
         function agregarRedencionPorNie() {
-            modoNie = 'redencion';
-            abrirModalNie();
-        }
-
-        function abrirModalNie() {
             if (!estudianteSeleccionadoNie) {
                 alert('⚠️ Primero busque un estudiante por NIE');
                 return;
             }
+            // Validación: solo si tiene demérito
+            const tieneDemerito = estudianteSeleccionadoNie.dem_a || estudianteSeleccionadoNie.dem_b || 
+                                  estudianteSeleccionadoNie.dem_c || estudianteSeleccionadoNie.dem_d;
+            if (!tieneDemerito) {
+                alert('❌ Este estudiante no tiene deméritos. No se puede agregar una redención.');
+                return;
+            }
+            modoNie = 'redencion';
+            abrirModalNie();
+        }
 
+        // 🆕 NUEVA FUNCIÓN: Agregar Mérito
+        function agregarMeritoPorNie() {
+            if (!estudianteSeleccionadoNie) {
+                alert('⚠️ Primero busque un estudiante por NIE');
+                return;
+            }
+            modoNie = 'reconocimiento';
+            abrirModalNie();
+        }
+
+        function abrirModalNie() {
             document.getElementById('demEstudiante').textContent = estudianteSeleccionadoNie.nombre;
             document.getElementById('demAno').textContent = estudianteSeleccionadoNie.ano;
             document.getElementById('demSeccion').textContent = estudianteSeleccionadoNie.seccion;
 
-            document.getElementById('modalDemeritoTitulo').textContent = 
-                modoNie === 'demerito' ? 'AGREGAR DEMERITO' : 'AGREGAR REDENCION';
+            // Título según el modo
+            let titulo = '';
+            if (modoNie === 'demerito') titulo = 'AGREGAR DEMERITO';
+            else if (modoNie === 'redencion') titulo = 'AGREGAR REDENCION';
+            else if (modoNie === 'reconocimiento') titulo = 'AGREGAR MÉRITO';
+            document.getElementById('modalDemeritoTitulo').textContent = titulo;
 
             actualizarOpcionesNie();
 
@@ -948,10 +989,20 @@
         }
 
         function actualizarOpcionesNie() {
-            const catalogo = modoNie === 'demerito' ? DEMERITOS : REDENCIONES;
-            const container = document.getElementById('opcionesDemeritoNie');
-            const titulo = modoNie === 'demerito' ? 'DEMERITOS' : 'REDENCIONES';
+            let catalogo = {};
+            let titulo = '';
+            if (modoNie === 'demerito') {
+                catalogo = DEMERITOS;
+                titulo = 'DEMERITOS';
+            } else if (modoNie === 'redencion') {
+                catalogo = REDENCIONES;
+                titulo = 'REDENCIONES';
+            } else if (modoNie === 'reconocimiento') {
+                catalogo = RECONOCIMIENTOS;
+                titulo = 'RECONOCIMIENTOS (MÉRITOS)';
+            }
 
+            const container = document.getElementById('opcionesDemeritoNie');
             let html = `<strong>${titulo}:</strong><br><br>`;
             for (const [letra, descripcion] of Object.entries(catalogo)) {
                 html += `
@@ -985,24 +1036,21 @@
                 return;
             }
 
-            // Obtener el ID del estudiante desde los datos cargados (campo 'id')
             const estudiante_id = registro.id;
             if (!estudiante_id) {
                 alert('ID de estudiante no disponible. Vuelve a sincronizar.');
                 return;
             }
 
-            // Preparar datos para la API
             const datos = {
                 estudiante_id: estudiante_id,
                 tipo: modoNie,
                 letras: letras,
                 fecha: fecha,
                 observaciones: observaciones,
-                usuario_id: 1 // por ahora fijo, luego se puede obtener de sesión
+                usuario_id: 1
             };
 
-            // Enviar a la API
             document.getElementById('statusMessage').textContent = '🔄 Guardando en MySQL...';
             fetch(API_URL + 'guardar_registro.php', {
                 method: 'POST',
@@ -1012,7 +1060,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Actualizar localmente también para que se vea inmediato
+                    // Actualizar localmente
                     if (modoNie === 'demerito') {
                         for (const letra of letras) {
                             if (DEMERITOS[letra]) {
@@ -1025,6 +1073,12 @@
                                 registro[`red_${letra.toLowerCase()}`] = 'X';
                             }
                         }
+                    } else if (modoNie === 'reconocimiento') {
+                        for (const letra of letras) {
+                            if (RECONOCIMIENTOS[letra]) {
+                                registro[`rec_${letra.toLowerCase()}`] = 'X';
+                            }
+                        }
                     }
                     registro.fecha = fecha;
                     registro.observaciones = observaciones || '';
@@ -1033,7 +1087,9 @@
                     actualizarTabla();
                     cerrarModalDemerito();
                     document.getElementById('statusMessage').textContent = `✅ ${modoNie.toUpperCase()} guardado en MySQL`;
-                    alert(`✅ ${modoNie.toUpperCase()} agregado correctamente en la base de datos`);
+                    setTimeout(() => {
+                        document.getElementById('statusMessage').textContent = 'Sistema listo';
+                    }, 4000);
                 } else {
                     alert('❌ Error al guardar: ' + (data.error || 'desconocido'));
                     document.getElementById('statusMessage').textContent = '❌ Error al guardar en MySQL';
@@ -1056,19 +1112,16 @@
         // ==================== MODAL NUEVO REGISTRO ====================
         function abrirModal() {
             if (usuarioActual.rol === 'profesor') {
-                alert('Los profesores solo pueden agregar deméritos o redenciones buscando por NIE');
+                alert('Los profesores solo pueden agregar deméritos, redenciones o méritos buscando por NIE');
                 return;
             }
-
             document.getElementById('modalRegistro').style.display = 'flex';
             document.getElementById('formRegistro').reset();
-
             const hoy = new Date();
             const fechaFormateada = hoy.getFullYear() + '-' + 
                                    String(hoy.getMonth() + 1).padStart(2, '0') + '-' + 
                                    String(hoy.getDate()).padStart(2, '0');
             document.getElementById('fecha').value = fechaFormateada;
-
             document.getElementById('ano').value = '1°';
             document.querySelector('input[name="seccion"][value="A"]').checked = true;
             document.getElementById('letras').value = '';
@@ -1080,12 +1133,10 @@
             document.getElementById('modalRegistro').style.display = 'none';
         }
 
-        // ==================== OPCIONES ====================
         function actualizarOpciones() {
             const tipo = document.querySelector('input[name="tipo"]:checked').value;
             const container = document.getElementById('opcionesDisponibles');
             let html = '';
-
             if (tipo === 'demerito') {
                 html = '<strong>DEMERITOS:</strong><br>';
                 for (const [key, value] of Object.entries(DEMERITOS)) {
@@ -1102,20 +1153,13 @@
                     html += `  ${key}) ${value}<br>`;
                 }
             }
-
             container.innerHTML = html;
         }
 
-        // ==================== GUARDAR (modal nuevo registro) ====================
         function guardarRegistro() {
-            // ... (mantiene la misma lógica de antes, solo guarda en localStorage)
-            // Esta función se usa para admin/registro cuando crean un estudiante nuevo
-            // Debería también guardar en MySQL, pero por ahora solo local.
-            // (Puedes extenderla más tarde)
-            alert('Función guardarRegistro() aún no sincronizada con MySQL. Usa el buscador NIE para agregar deméritos.');
+            alert('Función guardarRegistro() aún no sincronizada con MySQL. Usa el buscador NIE para agregar registros.');
         }
 
-        // ==================== ELIMINAR ====================
         function eliminarRegistro() {
             if (usuarioActual.rol === 'profesor') {
                 alert('Los profesores no tienen permiso para eliminar registros');
@@ -1136,7 +1180,6 @@
             }
         }
 
-        // ==================== EXPORTAR EXCEL ====================
         function exportarExcel() {
             if (registros.length === 0) {
                 alert('No hay registros para exportar');
