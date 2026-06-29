@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Registro de Deméritos - Bachillerato</title>
     <style>
-        /* ========== ESTILOS ========== */
+        /* ========== ESTILOS BASE ========== */
         * {
             margin: 0;
             padding: 0;
@@ -132,17 +132,40 @@
             display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
         }
         .status-bar span { font-size: 13px; }
+        /* MODALES GENERALES */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
             z-index: 1000; justify-content: center; align-items: center;
         }
         .modal-content {
-            background: white; padding: 30px; border-radius: 10px; max-width: 650px; width: 90%; max-height: 85vh;
+            background: white; padding: 30px; border-radius: 10px; max-width: 750px; width: 90%; max-height: 85vh;
             overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h2 { color: #1F3864; }
-        .close { cursor: pointer; font-size: 28px; color: #999; transition: 0.3s; }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .modal-header h2 {
+            color: #1F3864;
+            font-size: 22px;
+            margin: 0;
+        }
+        .modal-header .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .close {
+            cursor: pointer;
+            font-size: 30px;
+            color: #999;
+            transition: 0.3s;
+            line-height: 1;
+        }
         .close:hover { color: #333; transform: rotate(90deg); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
@@ -197,6 +220,170 @@
             background-color: #e9ecef;
             cursor: not-allowed;
         }
+        /* ===== ESTILOS PARA EL MODAL DE ESTADÍSTICAS ===== */
+        .estadisticas-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .estadisticas-content .est-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 5px solid #1F3864;
+        }
+        .estadisticas-content .est-header h3 {
+            color: #1F3864;
+            margin-bottom: 5px;
+        }
+        .estadisticas-content .est-header p {
+            margin: 3px 0;
+            color: #555;
+        }
+        .estadisticas-content .est-section {
+            margin: 15px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .estadisticas-content .est-section.demerito { border-left-color: #dc3545; }
+        .estadisticas-content .est-section.redencion { border-left-color: #17a2b8; }
+        .estadisticas-content .est-section.reconocimiento { border-left-color: #ffc107; }
+        .estadisticas-content .est-section h4 {
+            color: #1F3864;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+        .estadisticas-content .est-item {
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .estadisticas-content .est-item:last-child { border-bottom: none; }
+        .estadisticas-content .est-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin-right: 5px;
+        }
+        .estadisticas-content .est-badge.demerito { background: #dc3545; }
+        .estadisticas-content .est-badge.redencion { background: #17a2b8; }
+        .estadisticas-content .est-badge.reconocimiento { background: #ffc107; color: #333; }
+        .estadisticas-content .est-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .estadisticas-content .est-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .estadisticas-content .est-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .estadisticas-content .est-list::-webkit-scrollbar-thumb {
+            background: #1F3864;
+            border-radius: 10px;
+        }
+        .estadisticas-content .est-estudiante-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+        .estadisticas-content .est-estudiante-card:hover {
+            border-color: #1F3864;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .estadisticas-content .est-estudiante-card .nombre {
+            font-weight: bold;
+            color: #1F3864;
+            font-size: 15px;
+        }
+        .estadisticas-content .est-estudiante-card .detalle {
+            color: #666;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        .estadisticas-content .est-estudiante-card .tags {
+            margin-top: 4px;
+        }
+        .estadisticas-content .est-estudiante-card .tags span {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 1px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-right: 5px;
+            color: #333;
+        }
+        .estadisticas-content .est-empty {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+        .estado-cumplido {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        .estado-pendiente {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        /* ===== ESTILOS DE IMPRESIÓN ===== */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .modal, .modal-content, .modal-content * {
+                visibility: visible;
+            }
+            .modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                display: block !important;
+                padding: 20px;
+            }
+            .modal-content {
+                max-width: 100%;
+                max-height: 100%;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 10px;
+                overflow-y: visible;
+            }
+            .modal-header .btn-group {
+                display: none !important;
+            }
+            .modal-header .close {
+                display: none !important;
+            }
+            .btn-print {
+                display: none !important;
+            }
+            .btn-cerrar-modal {
+                display: none !important;
+            }
+            .estadisticas-content .est-list {
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
         @media (max-width: 768px) {
             .toolbar { flex-direction: column; }
             .btn { width: 100%; }
@@ -209,6 +396,7 @@
             .modal-content { padding: 20px; }
             .toolbar .btn-group { width: 100%; margin-left: 0; flex-wrap: wrap; }
             .toolbar .btn-group .btn { flex: 1; }
+            .modal-content { max-width: 95%; padding: 15px; }
         }
     </style>
 </head>
@@ -220,29 +408,25 @@
         <p class="subtitle">Bachillerato - 1°, 2° y 3° Año</p>
         <form id="loginForm" onsubmit="return login(event)">
             <div class="form-group">
-                <label>Usuario</label>
-                <input type="text" id="loginUser" placeholder="Ingrese su usuario" required>
+                <label>Rol</label>
+                <select id="loginRol" required>
+                    <option value="">Seleccione su rol...</option>
+                    <option value="admin">Administrador</option>
+                    <option value="registro">Registro Académico</option>
+                    <option value="profesor">Profesor</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Contraseña</label>
                 <input type="password" id="loginPass" placeholder="Ingrese su contraseña" required>
             </div>
-            <div class="form-group">
-                <label>Rol</label>
-                <select id="loginRol" required>
-                    <option value="">Seleccione su rol...</option>
-                    <option value="admin">Administrador</option>
-                    <option value="registro">Registro Academico</option>
-                    <option value="profesor">Profesor</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-login">Iniciar Sesion</button>
-            <div id="loginError" class="error">Usuario o contraseña incorrectos</div>
+            <button type="submit" class="btn-login">Iniciar Sesión</button>
+            <div id="loginError" class="error">Rol o contraseña incorrectos</div>
             <div class="info-roles">
                 <strong>Credenciales de prueba:</strong><br>
-                Admin: admin / admin123<br>
-                Registro: registro / reg123<br>
-                Profesor: profe / profe123
+                Administrador: admin123<br>
+                Registro Académico: reg123<br>
+                Profesor: profe123
             </div>
         </form>
     </div>
@@ -256,19 +440,18 @@
             <div class="user-info">
                 <span>Usuario: <span id="userName">Usuario</span></span>
                 <span class="badge-role" id="userRoleBadge">Rol</span>
-                <button class="btn-logout" onclick="logout()">Cerrar Sesion</button>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
             </div>
         </div>
 
-        <!-- TOOLBAR con botones y filtros -->
+        <!-- TOOLBAR -->
         <div class="toolbar">
-            <button class="btn btn-success" onclick="filtrarMeritos()">⭐ Méritos</button>
-            <button class="btn btn-warning" onclick="mostrarEstadisticas()">📊 Estadísticas</button>
+            <button class="btn btn-success" onclick="filtrarMeritos()">Meritos</button>
+            <button class="btn btn-warning" onclick="mostrarEstadisticas()">Estadisticas</button>
             
-            <!-- Botones de gestión de alumnos (solo admin y registro) -->
             <div class="btn-group" id="gestionAlumnos">
-                <button class="btn btn-add" onclick="abrirModalAgregarAlumno()">➕ Agregar Alumno</button>
-                <button class="btn btn-delete" onclick="eliminarAlumno()">🗑️ Eliminar Alumno</button>
+                <button class="btn btn-add" onclick="abrirModalAgregarAlumno()">Agregar Alumno</button>
+                <button class="btn btn-delete" onclick="eliminarAlumno()">Eliminar Alumno</button>
             </div>
 
             <div class="filter-group">
@@ -307,7 +490,7 @@
             </div>
         </div>
 
-        <!-- Buscador NIE (solo para profesores) -->
+        <!-- Buscador NIE -->
         <div id="buscadorNie" class="buscador-nie">
             <label>Buscar por NIE (7 dígitos):</label>
             <input type="number" id="inputNie" placeholder="Ej: 1000001" oninput="buscarPorNie()">
@@ -315,7 +498,7 @@
             <div class="btn-group">
                 <button class="btn btn-danger" onclick="agregarDemeritoPorNie()">Agregar Demérito</button>
                 <button class="btn btn-info" onclick="agregarRedencionPorNie()">Agregar Redención</button>
-                <button class="btn btn-success" onclick="agregarMeritoPorNie()">⭐ Agregar Mérito</button>
+                <button class="btn btn-success" onclick="agregarMeritoPorNie()">Agregar Mérito</button>
             </div>
         </div>
 
@@ -379,7 +562,7 @@
                 <tbody id="cuerpoTabla">
                     <tr>
                         <td colspan="18" class="no-registros">
-                            <div class="loading">🔄 Cargando datos desde MySQL...</div>
+                            <div class="loading">Cargando datos desde MySQL...</div>
                         </td>
                     </tr>
                 </tbody>
@@ -487,6 +670,25 @@
         </div>
     </div>
 
+    <!-- ===== MODAL DE ESTADÍSTICAS ===== -->
+    <div class="modal" id="modalEstadisticas">
+        <div class="modal-content" id="estadisticasModalContent">
+            <div class="modal-header">
+                <h2 id="estadisticasTitulo">Estadisticas</h2>
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-print" onclick="imprimirEstadisticas()">Imprimir</button>
+                    <span class="close" onclick="cerrarModalEstadisticas()">&times;</span>
+                </div>
+            </div>
+            <div id="estadisticasCuerpo" class="estadisticas-content">
+                <!-- Aquí se inyecta el contenido dinámicamente -->
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary btn-cerrar-modal" onclick="cerrarModalEstadisticas()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Importar JS config -->
     <script src="js/config.js"></script>
 
@@ -521,7 +723,7 @@
         // ==================== FUNCIONES API ====================
         async function cargarEstudiantesDesdeAPI() {
             try {
-                document.getElementById('statusMessage').textContent = '🔄 Cargando datos desde MySQL...';
+                document.getElementById('statusMessage').textContent = 'Cargando datos desde MySQL...';
                 const response = await fetch(API_URL + 'get_estudiantes.php');
                 const data = await response.json();
 
@@ -551,17 +753,17 @@
 
                     guardarEnLocalStorage();
                     document.getElementById('statusMessage').textContent = 
-                        `✅ Datos cargados desde MySQL: ${registros.length} estudiantes (con registros)`;
+                        'Datos cargados desde MySQL: ' + registros.length + ' estudiantes (con registros)';
                     actualizarTabla();
                     return true;
                 } else {
                     if (cargarDesdeLocalStorage()) {
                         document.getElementById('statusMessage').textContent = 
-                            `📂 Datos cargados desde localStorage (fallback): ${registros.length} estudiantes`;
+                            'Datos cargados desde localStorage (fallback): ' + registros.length + ' estudiantes';
                         actualizarTabla();
                         return true;
                     }
-                    document.getElementById('statusMessage').textContent = '⚠️ No hay datos disponibles';
+                    document.getElementById('statusMessage').textContent = 'No hay datos disponibles';
                     mostrarSinDatos();
                     return false;
                 }
@@ -569,7 +771,7 @@
                 console.error('Error al cargar desde API:', error);
                 if (cargarDesdeLocalStorage()) {
                     document.getElementById('statusMessage').textContent = 
-                        `📂 Datos cargados desde localStorage (fallback): ${registros.length} estudiantes`;
+                        'Datos cargados desde localStorage (fallback): ' + registros.length + ' estudiantes';
                     actualizarTabla();
                     return true;
                 }
@@ -583,8 +785,7 @@
             tbody.innerHTML = `
                 <tr>
                     <td colspan="18" class="no-registros">
-                        <div style="font-size: 18px; margin-bottom: 10px;">📭</div>
-                        No hay estudiantes registrados.<br>
+                        <div style="font-size: 18px; margin-bottom: 10px;">No hay estudiantes registrados.</div>
                         <small>Haz clic en "Sincronizar MySQL" para cargar los datos.</small>
                     </td>
                 </tr>
@@ -592,26 +793,48 @@
         }
 
         // ==================== LOGIN ====================
+        const ROL_USUARIO = {
+            'admin': { usuario: 'admin', nombre: 'Administrador' },
+            'registro': { usuario: 'registro', nombre: 'Registro Académico' },
+            'profesor': { usuario: 'profe', nombre: 'Profesor' }
+        };
+
+        const PASSWORDS = {
+            'admin': 'admin123',
+            'registro': 'reg123',
+            'profe': 'profe123'
+        };
+
         function login(event) {
             event.preventDefault();
-            const user = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
             const rol = document.getElementById('loginRol').value;
+            const pass = document.getElementById('loginPass').value.trim();
             const errorDiv = document.getElementById('loginError');
 
-            const USUARIOS = {
-                'admin': { password: 'admin123', rol: 'admin', nombre: 'Administrador' },
-                'registro': { password: 'reg123', rol: 'registro', nombre: 'Registro Academico' },
-                'profe': { password: 'profe123', rol: 'profesor', nombre: 'Profesor' }
-            };
+            if (!rol) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Seleccione un rol';
+                return;
+            }
 
-            if (USUARIOS[user] && USUARIOS[user].password === pass && USUARIOS[user].rol === rol) {
-                usuarioActual = { usuario: user, nombre: USUARIOS[user].nombre, rol: USUARIOS[user].rol };
+            const userData = ROL_USUARIO[rol];
+            if (!userData) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Rol no válido';
+                return;
+            }
+
+            if (PASSWORDS[userData.usuario] === pass) {
+                usuarioActual = {
+                    usuario: userData.usuario,
+                    nombre: userData.nombre,
+                    rol: rol
+                };
                 errorDiv.style.display = 'none';
                 iniciarSistema();
             } else {
                 errorDiv.style.display = 'block';
-                errorDiv.textContent = 'Usuario, contraseña o rol incorrectos';
+                errorDiv.textContent = 'Contraseña incorrecta para el rol seleccionado';
             }
         }
 
@@ -625,7 +848,7 @@
                 badge.textContent = 'Administrador';
                 badge.className = 'badge-role badge-admin';
             } else if (usuarioActual.rol === 'registro') {
-                badge.textContent = 'Registro Academico';
+                badge.textContent = 'Registro Académico';
                 badge.className = 'badge-role badge-registro';
             } else {
                 badge.textContent = 'Profesor';
@@ -637,18 +860,21 @@
         }
 
         function logout() {
-            if (confirm('¿Desea cerrar sesion?')) {
-                usuarioActual = null;
-                document.getElementById('sistemaContainer').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'block';
-                document.getElementById('loginForm').reset();
-            }
+            usuarioActual = null;
+            registroSeleccionado = null;
+            estudianteSeleccionadoNie = null;
+            filtroNie = '';
+            document.getElementById('inputNie').value = '';
+            document.getElementById('resultadoNie').textContent = '';
+            document.getElementById('sistemaContainer').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('loginForm').reset();
         }
 
         // ==================== PERMISOS ====================
         function configurarPermisos() {
             const rol = usuarioActual.rol;
-            document.getElementById('buscadorNie').style.display = (rol === 'profesor') ? 'flex' : 'none';
+            document.getElementById('buscadorNie').style.display = (rol === 'profesor' || rol === 'admin' || rol === 'registro') ? 'flex' : 'none';
             
             const gestionAlumnos = document.getElementById('gestionAlumnos');
             if (rol === 'admin' || rol === 'registro') {
@@ -671,6 +897,25 @@
                 if (data) { registros = JSON.parse(data); return true; }
             } catch (e) { console.log('No se pudo cargar desde localStorage'); }
             return false;
+        }
+
+        // ==================== FUNCIONES DE ESTADO DE DEMÉRITO ====================
+        function obtenerEstadoDemerito(estudiante, letra) {
+            if (letra === 'A' && estudiante.red_a) return 'cumplido';
+            if (letra === 'B' && estudiante.red_b) return 'cumplido';
+            if (letra === 'C' && estudiante.red_c) return 'cumplido';
+            return 'pendiente';
+        }
+
+        function mostrarDemerito(estudiante, letra) {
+            const tiene = estudiante[`dem_${letra.toLowerCase()}`];
+            if (!tiene) return '';
+            const estado = obtenerEstadoDemerito(estudiante, letra);
+            if (estado === 'cumplido') {
+                return 'Cumplido';
+            } else {
+                return 'Pendiente';
+            }
         }
 
         // ==================== TABLA Y FILTROS ====================
@@ -724,6 +969,11 @@
                 else if (reg.rec_a || reg.rec_b) tipo = 'reconocimiento';
                 if (tipo) tr.className = tipo;
 
+                const demA = mostrarDemerito(reg, 'A');
+                const demB = mostrarDemerito(reg, 'B');
+                const demC = mostrarDemerito(reg, 'C');
+                const demD = reg.dem_d ? 'Pendiente' : '';
+
                 const valores = [
                     reg.num || index + 1,
                     reg.nombre || '',
@@ -734,10 +984,10 @@
                     reg.ano || '',
                     reg.turno || '',
                     formatearFecha(reg.fecha) || '',
-                    reg.dem_a || '',
-                    reg.dem_b || '',
-                    reg.dem_c || '',
-                    reg.dem_d || '',
+                    demA,
+                    demB,
+                    demC,
+                    demD,
                     reg.red_a || '',
                     reg.red_b || '',
                     reg.red_c || '',
@@ -751,7 +1001,6 @@
                     tr.appendChild(td);
                 });
 
-                // ===== NUEVO: seleccionar sin filtrar =====
                 tr.onclick = function() {
                     seleccionarAlumno(reg);
                 };
@@ -759,7 +1008,6 @@
                 tbody.appendChild(tr);
             });
 
-            // Si hay un registro seleccionado, resaltarlo
             if (registroSeleccionado !== null && registroSeleccionado < registros.length) {
                 const filas = document.querySelectorAll('#cuerpoTabla tr');
                 const regSel = registros[registroSeleccionado];
@@ -771,40 +1019,34 @@
             }
 
             actualizarEstadisticas();
-            let msg = `Mostrando: ${registrosFiltrados.length} de ${registros.length} registros`;
-            if (filtroCodigo) msg += ` (Código: ${filtroCodigo})`;
-            if (filtroNieActual) msg += ` (NIE: ${filtroNieActual})`;
+            let msg = 'Mostrando: ' + registrosFiltrados.length + ' de ' + registros.length + ' registros';
+            if (filtroCodigo) msg += ' (Código: ' + filtroCodigo + ')';
+            if (filtroNieActual) msg += ' (NIE: ' + filtroNieActual + ')';
             document.getElementById('filtroMessage').textContent = msg;
         }
 
         function formatearFecha(fecha) {
             if (!fecha) return '';
             const partes = fecha.split('-');
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return partes[2] + '/' + partes[1] + '/' + partes[0];
         }
 
-        // ==================== SELECCIONAR ALUMNO (sin filtrar) ====================
+        // ==================== SELECCIONAR ALUMNO ====================
         function seleccionarAlumno(reg) {
-            // Resaltar la fila
             document.querySelectorAll('#cuerpoTabla tr').forEach(f => f.style.background = '');
-            // Buscar la fila correspondiente en la tabla actual
             const filas = document.querySelectorAll('#cuerpoTabla tr');
             filas.forEach((fila, idx) => {
                 if (idx < registrosFiltrados.length && registrosFiltrados[idx].nie === reg.nie) {
                     fila.style.background = '#d4edda';
                 }
             });
-            // Guardar selección
             registroSeleccionado = registros.indexOf(reg);
-            // Opcional: mostrar el NIE en el input pero sin filtrar
             const inputNie = document.getElementById('inputNie');
             if (inputNie) {
                 inputNie.value = reg.nie;
-                // No llamamos a buscarPorNie() para no activar el filtro
-                // Solo actualizamos el resultado de búsqueda exacta (opcional)
                 const resultado = document.getElementById('resultadoNie');
                 if (resultado) {
-                    resultado.textContent = `✅ Seleccionado: ${reg.nombre} - ${reg.codigo}`;
+                    resultado.textContent = 'Seleccionado: ' + reg.nombre + ' - ' + reg.codigo;
                 }
                 estudianteSeleccionadoNie = reg;
             }
@@ -847,7 +1089,7 @@
             document.getElementById('total1Ano').textContent = total1Ano;
             document.getElementById('total2Ano').textContent = total2Ano;
             document.getElementById('total3Ano').textContent = total3Ano;
-            document.getElementById('totalMessage').textContent = `Total estudiantes: ${totalBase} | Mostrando: ${datosMostrar.length}`;
+            document.getElementById('totalMessage').textContent = 'Total estudiantes: ' + totalBase + ' | Mostrando: ' + datosMostrar.length;
 
             document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
             if (filtroEspecialidad !== 'todos' || filtroTurno !== 'todos' || filtroCodigo !== '' || filtroNieActual !== '') {
@@ -859,67 +1101,87 @@
             }
         }
 
-        // ==================== MOSTRAR ESTADÍSTICAS (con selección) ====================
+        // ==================== MOSTRAR ESTADÍSTICAS EN MODAL ====================
         function mostrarEstadisticas() {
+            const modal = document.getElementById('modalEstadisticas');
+            const titulo = document.getElementById('estadisticasTitulo');
+            const cuerpo = document.getElementById('estadisticasCuerpo');
+
+            // Caso 1: Estudiante seleccionado
             if (registroSeleccionado !== null && registroSeleccionado >= 0 && registroSeleccionado < registros.length) {
                 const est = registros[registroSeleccionado];
-                let reporte = '📊 ESTADÍSTICAS DEL ESTUDIANTE SELECCIONADO\n';
-                reporte += '─────────────────────────────────────────────\n\n';
-                reporte += `Nombre: ${est.nombre}\n`;
-                reporte += `NIE: ${est.nie}\n`;
-                reporte += `Sexo: ${est.sexo}\n`;
-                reporte += `Especialidad: ${est.especialidad}\n`;
-                reporte += `Código: ${est.codigo}\n`;
-                reporte += `Año: ${est.ano}\n`;
-                reporte += `Turno: ${est.turno}\n`;
-                reporte += `Fecha último registro: ${formatearFecha(est.fecha) || 'No registrada'}\n\n`;
+                titulo.textContent = 'Estadísticas del Estudiante Seleccionado';
 
+                let html = `
+                    <div class="est-header">
+                        <h3>${est.nombre}</h3>
+                        <p><strong>NIE:</strong> ${est.nie} &nbsp;|&nbsp; <strong>Sexo:</strong> ${est.sexo}</p>
+                        <p><strong>Especialidad:</strong> ${est.especialidad} &nbsp;|&nbsp; <strong>Código:</strong> ${est.codigo}</p>
+                        <p><strong>Año:</strong> ${est.ano} &nbsp;|&nbsp; <strong>Turno:</strong> ${est.turno}</p>
+                        <p><strong>Fecha último registro:</strong> ${formatearFecha(est.fecha) || 'No registrada'}</p>
+                    </div>
+                `;
+
+                // Deméritos con estado
                 let demLetras = [];
                 if (est.dem_a) demLetras.push('A');
                 if (est.dem_b) demLetras.push('B');
                 if (est.dem_c) demLetras.push('C');
                 if (est.dem_d) demLetras.push('D');
+                html += `<div class="est-section demerito"><h4>Deméritos</h4>`;
                 if (demLetras.length > 0) {
-                    let descs = demLetras.map(l => `${l}) ${DEMERITOS[l]}`).join('; ');
-                    reporte += `Deméritos: ${descs}\n`;
+                    demLetras.forEach(l => {
+                        const estado = obtenerEstadoDemerito(est, l);
+                        const textoEstado = estado === 'cumplido' ? 'Cumplido' : 'Pendiente';
+                        html += `<div class="est-item"><span class="est-badge demerito">${l}</span> ${DEMERITOS[l]} <span class="estado-${estado}">${textoEstado}</span></div>`;
+                    });
                 } else {
-                    reporte += `Deméritos: Ninguno\n`;
+                    html += `<div class="est-empty">Ningún demérito registrado</div>`;
                 }
+                html += `</div>`;
 
+                // Redenciones
                 let redLetras = [];
                 if (est.red_a) redLetras.push('A');
                 if (est.red_b) redLetras.push('B');
                 if (est.red_c) redLetras.push('C');
+                html += `<div class="est-section redencion"><h4>Redenciones</h4>`;
                 if (redLetras.length > 0) {
-                    let descs = redLetras.map(l => `${l}) ${REDENCIONES[l]}`).join('; ');
-                    reporte += `Redenciones: ${descs}\n`;
+                    redLetras.forEach(l => {
+                        html += `<div class="est-item"><span class="est-badge redencion">${l}</span> ${REDENCIONES[l]}</div>`;
+                    });
                 } else {
-                    reporte += `Redenciones: Ninguna\n`;
+                    html += `<div class="est-empty">Ninguna redención registrada</div>`;
                 }
+                html += `</div>`;
 
+                // Reconocimientos (Méritos)
                 let recLetras = [];
                 if (est.rec_a) recLetras.push('A');
                 if (est.rec_b) recLetras.push('B');
+                html += `<div class="est-section reconocimiento"><h4>Méritos / Reconocimientos</h4>`;
                 if (recLetras.length > 0) {
-                    let descs = recLetras.map(l => `${l}) ${RECONOCIMIENTOS[l]}`).join('; ');
-                    reporte += `Méritos: ${descs}\n`;
+                    recLetras.forEach(l => {
+                        html += `<div class="est-item"><span class="est-badge reconocimiento">${l}</span> ${RECONOCIMIENTOS[l]}</div>`;
+                    });
                 } else {
-                    reporte += `Méritos: Ninguno\n`;
+                    html += `<div class="est-empty">Ningún mérito registrado</div>`;
                 }
+                html += `</div>`;
 
-                reporte += `\nObservaciones: ${est.observaciones || 'Sin observaciones'}\n`;
+                // Observaciones
+                html += `<div class="est-section" style="border-left-color: #6c757d;"><h4>Observaciones</h4>`;
+                html += `<div class="est-item">${est.observaciones || 'Sin observaciones'}</div>`;
+                html += `</div>`;
 
-                if (reporte.length > 2000) {
-                    const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
-                    win.document.write(`<pre style="font-family:monospace;font-size:14px;padding:20px;">${reporte}</pre>`);
-                    win.document.close();
-                } else {
-                    alert(reporte);
-                }
+                cuerpo.innerHTML = html;
+                modal.style.display = 'flex';
                 return;
             }
 
-            // Caso general con filtros
+            // Caso 2: Reporte general con filtros
+            titulo.textContent = 'Reporte Detallado de Estudiantes (Filtros Aplicados)';
+
             const filtroAno = document.getElementById('filtroAno').value;
             const filtroEspecialidad = document.getElementById('filtroEspecialidad').value;
             const filtroTurno = document.getElementById('filtroTurno').value;
@@ -950,31 +1212,31 @@
                 );
             }
 
-            let reporte = '📊 REPORTE DETALLADO DE ESTUDIANTES (FILTROS APLICADOS)\n';
-            reporte += '─────────────────────────────────────────────\n\n';
-
             if (estudiantesFiltrados.length === 0) {
-                reporte += 'No hay estudiantes que coincidan con los filtros.';
-                alert(reporte);
+                cuerpo.innerHTML = `<div class="est-empty">No hay estudiantes que coincidan con los filtros.</div>`;
+                modal.style.display = 'flex';
                 return;
             }
 
+            let html = `<div class="est-list">`;
             estudiantesFiltrados.forEach((est, idx) => {
-                reporte += `${idx+1}. ${est.nombre} (NIE: ${est.nie})\n`;
-                reporte += `   Especialidad: ${est.especialidad} | Código: ${est.codigo}\n`;
-                reporte += `   Año: ${est.ano} | Turno: ${est.turno}\n`;
-                reporte += `   Fecha último registro: ${formatearFecha(est.fecha) || 'No registrada'}\n`;
+                html += `<div class="est-estudiante-card">`;
+                html += `<div class="nombre">${idx+1}. ${est.nombre} <span style="font-weight:normal;color:#666;font-size:13px;">(NIE: ${est.nie})</span></div>`;
+                html += `<div class="detalle">Especialidad: ${est.especialidad} | Código: ${est.codigo} | Año: ${est.ano} | Turno: ${est.turno}</div>`;
+                html += `<div class="detalle">Fecha último registro: ${formatearFecha(est.fecha) || 'No registrada'}</div>`;
+                html += `<div class="tags">`;
 
-                let demLetras = [];
-                if (est.dem_a) demLetras.push('A');
-                if (est.dem_b) demLetras.push('B');
-                if (est.dem_c) demLetras.push('C');
-                if (est.dem_d) demLetras.push('D');
-                if (demLetras.length > 0) {
-                    let descs = demLetras.map(l => `${l}) ${DEMERITOS[l]}`).join('; ');
-                    reporte += `   Deméritos: ${descs}\n`;
+                // Deméritos con estado
+                let demList = [];
+                if (est.dem_a) demList.push({letra:'A', desc:DEMERITOS['A'], estado:obtenerEstadoDemerito(est,'A')});
+                if (est.dem_b) demList.push({letra:'B', desc:DEMERITOS['B'], estado:obtenerEstadoDemerito(est,'B')});
+                if (est.dem_c) demList.push({letra:'C', desc:DEMERITOS['C'], estado:obtenerEstadoDemerito(est,'C')});
+                if (est.dem_d) demList.push({letra:'D', desc:DEMERITOS['D'], estado:'pendiente'});
+                if (demList.length > 0) {
+                    let descs = demList.map(item => `${item.letra}) ${item.desc} (${item.estado === 'cumplido' ? 'Cumplido' : 'Pendiente'})`).join('; ');
+                    html += `<span style="background:#fce4d6;color:#721c24;">Deméritos: ${descs}</span>`;
                 } else {
-                    reporte += `   Deméritos: Ninguno\n`;
+                    html += `<span style="background:#e9ecef;">Deméritos: Ninguno</span>`;
                 }
 
                 let redLetras = [];
@@ -983,9 +1245,9 @@
                 if (est.red_c) redLetras.push('C');
                 if (redLetras.length > 0) {
                     let descs = redLetras.map(l => `${l}) ${REDENCIONES[l]}`).join('; ');
-                    reporte += `   Redenciones: ${descs}\n`;
+                    html += `<span style="background:#d1ecf1;color:#0c5460;">Redenciones: ${descs}</span>`;
                 } else {
-                    reporte += `   Redenciones: Ninguna\n`;
+                    html += `<span style="background:#e9ecef;">Redenciones: Ninguna</span>`;
                 }
 
                 let recLetras = [];
@@ -993,24 +1255,30 @@
                 if (est.rec_b) recLetras.push('B');
                 if (recLetras.length > 0) {
                     let descs = recLetras.map(l => `${l}) ${RECONOCIMIENTOS[l]}`).join('; ');
-                    reporte += `   Méritos: ${descs}\n`;
+                    html += `<span style="background:#fff3cd;color:#856404;">Méritos: ${descs}</span>`;
                 } else {
-                    reporte += `   Méritos: Ninguno\n`;
+                    html += `<span style="background:#e9ecef;">Méritos: Ninguno</span>`;
                 }
 
-                reporte += `   Observaciones: ${est.observaciones || 'Sin observaciones'}\n`;
-                reporte += `   ─────────────────────────────────────────────\n`;
+                html += `</div>`;
+                html += `<div class="detalle" style="margin-top:4px;color:#555;"><strong>Observaciones:</strong> ${est.observaciones || 'Sin observaciones'}</div>`;
+                html += `</div>`;
             });
+            html += `</div>`;
 
-            if (reporte.length > 2000) {
-                const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
-                win.document.write(`<pre style="font-family:monospace;font-size:14px;padding:20px;">${reporte}</pre>`);
-                win.document.close();
-            } else {
-                alert(reporte);
-            }
+            cuerpo.innerHTML = html;
+            modal.style.display = 'flex';
         }
 
+        function cerrarModalEstadisticas() {
+            document.getElementById('modalEstadisticas').style.display = 'none';
+        }
+
+        function imprimirEstadisticas() {
+            window.print();
+        }
+
+        // ==================== FILTROS Y BÚSQUEDA ====================
         function aplicarFiltros() {
             actualizarTabla();
         }
@@ -1020,7 +1288,7 @@
             aplicarFiltros();
         }
 
-        // ==================== BUSCADOR POR NIE (solo manual) ====================
+        // ==================== BUSCADOR POR NIE ====================
         function buscarPorNie() {
             const inputNie = document.getElementById('inputNie');
             const nie = inputNie.value.trim();
@@ -1035,15 +1303,13 @@
                 return;
             }
 
-            // Buscar coincidencia exacta para mostrar mensaje
             const estudianteExacto = registros.find(r => r.nie === nie);
             if (estudianteExacto) {
-                resultado.textContent = `✅ Encontrado: ${estudianteExacto.nombre} - ${estudianteExacto.codigo}`;
+                resultado.textContent = 'Encontrado: ' + estudianteExacto.nombre + ' - ' + estudianteExacto.codigo;
                 estudianteSeleccionadoNie = estudianteExacto;
-                // Resaltar automáticamente el alumno
                 seleccionarAlumno(estudianteExacto);
             } else {
-                resultado.textContent = '❌ Estudiante no encontrado (coincidencia exacta)';
+                resultado.textContent = 'Estudiante no encontrado (coincidencia exacta)';
                 estudianteSeleccionadoNie = null;
                 registroSeleccionado = null;
             }
@@ -1060,7 +1326,6 @@
             document.getElementById('addAno').value = '1°';
             document.getElementById('addTurno').value = 'Matutino';
 
-            // Calcular siguiente NIE
             let maxNie = 0;
             if (registros.length > 0) {
                 const nies = registros.map(r => parseInt(r.nie));
@@ -1087,12 +1352,12 @@
             const turno = document.getElementById('addTurno').value;
 
             if (!nombre || !nie || !codigo) {
-                alert('⚠️ Complete todos los campos obligatorios (Nombre, NIE, Código)');
+                alert('Complete todos los campos obligatorios (Nombre, NIE, Código)');
                 return;
             }
 
             if (registros.some(r => r.nie === nie)) {
-                alert('❌ El NIE ya existe. Actualice la lista y vuelva a intentar.');
+                alert('El NIE ya existe. Actualice la lista y vuelva a intentar.');
                 return;
             }
 
@@ -1106,7 +1371,7 @@
                 turno: turno
             };
 
-            document.getElementById('statusMessage').textContent = '🔄 Agregando alumno...';
+            document.getElementById('statusMessage').textContent = 'Agregando alumno...';
             fetch(API_URL + 'agregar_estudiante.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1115,33 +1380,33 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ Alumno agregado correctamente');
+                    alert('Alumno agregado correctamente');
                     cerrarModalAgregarAlumno();
                     cargarEstudiantesDesdeAPI();
                 } else {
-                    alert('❌ Error al agregar: ' + (data.error || 'desconocido'));
-                    document.getElementById('statusMessage').textContent = '❌ Error al agregar alumno';
+                    alert('Error al agregar: ' + (data.error || 'desconocido'));
+                    document.getElementById('statusMessage').textContent = 'Error al agregar alumno';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('❌ Error de conexión con el servidor');
-                document.getElementById('statusMessage').textContent = '❌ Error de conexión';
+                alert('Error de conexión con el servidor');
+                document.getElementById('statusMessage').textContent = 'Error de conexión';
             });
         }
 
         // ==================== ELIMINAR ALUMNO ====================
         function eliminarAlumno() {
             if (registroSeleccionado === null || registroSeleccionado >= registros.length) {
-                alert('⚠️ Seleccione un alumno de la tabla para eliminar');
+                alert('Seleccione un alumno de la tabla para eliminar');
                 return;
             }
             const alumno = registros[registroSeleccionado];
-            if (!confirm(`¿Está seguro de eliminar al alumno ${alumno.nombre} (NIE: ${alumno.nie})?`)) {
+            if (!confirm('¿Está seguro de eliminar al alumno ' + alumno.nombre + ' (NIE: ' + alumno.nie + ')?')) {
                 return;
             }
 
-            document.getElementById('statusMessage').textContent = '🔄 Eliminando alumno...';
+            document.getElementById('statusMessage').textContent = 'Eliminando alumno...';
             fetch(API_URL + 'eliminar_estudiante.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1150,8 +1415,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ Alumno eliminado correctamente');
-                    // Resetear filtro de NIE
+                    alert('Alumno eliminado correctamente');
                     filtroNie = '';
                     const inputNie = document.getElementById('inputNie');
                     if (inputNie) inputNie.value = '';
@@ -1161,21 +1425,25 @@
                     estudianteSeleccionadoNie = null;
                     cargarEstudiantesDesdeAPI();
                 } else {
-                    alert('❌ Error al eliminar: ' + (data.error || 'desconocido'));
-                    document.getElementById('statusMessage').textContent = '❌ Error al eliminar alumno';
+                    alert('Error al eliminar: ' + (data.error || 'desconocido'));
+                    document.getElementById('statusMessage').textContent = 'Error al eliminar alumno';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('❌ Error de conexión con el servidor');
-                document.getElementById('statusMessage').textContent = '❌ Error de conexión';
+                alert('Error de conexión con el servidor');
+                document.getElementById('statusMessage').textContent = 'Error de conexión';
             });
         }
 
         // ==================== AGREGAR DEMERITO / REDENCION / MÉRITO ====================
         function agregarDemeritoPorNie() {
+            if (usuarioActual.rol !== 'profesor') {
+                alert('Solo los profesores pueden agregar deméritos.');
+                return;
+            }
             if (!estudianteSeleccionadoNie) {
-                alert('⚠️ Primero busque un estudiante por NIE (coincidencia exacta)');
+                alert('Primero busque un estudiante por NIE (coincidencia exacta)');
                 return;
             }
             modoNie = 'demerito';
@@ -1183,14 +1451,18 @@
         }
 
         function agregarRedencionPorNie() {
+            if (usuarioActual.rol !== 'profesor') {
+                alert('Solo los profesores pueden agregar redenciones.');
+                return;
+            }
             if (!estudianteSeleccionadoNie) {
-                alert('⚠️ Primero busque un estudiante por NIE (coincidencia exacta)');
+                alert('Primero busque un estudiante por NIE (coincidencia exacta)');
                 return;
             }
             const tieneDemerito = estudianteSeleccionadoNie.dem_a || estudianteSeleccionadoNie.dem_b || 
                                   estudianteSeleccionadoNie.dem_c || estudianteSeleccionadoNie.dem_d;
             if (!tieneDemerito) {
-                alert('❌ Este estudiante no tiene deméritos. No se puede agregar una redención.');
+                alert('Este estudiante no tiene deméritos. No se puede agregar una redención.');
                 return;
             }
             modoNie = 'redencion';
@@ -1198,8 +1470,12 @@
         }
 
         function agregarMeritoPorNie() {
+            if (usuarioActual.rol !== 'profesor') {
+                alert('Solo los profesores pueden agregar méritos.');
+                return;
+            }
             if (!estudianteSeleccionadoNie) {
-                alert('⚠️ Primero busque un estudiante por NIE (coincidencia exacta)');
+                alert('Primero busque un estudiante por NIE (coincidencia exacta)');
                 return;
             }
             modoNie = 'reconocimiento';
@@ -1244,7 +1520,7 @@
             }
 
             const container = document.getElementById('opcionesDemeritoNie');
-            let html = `<strong>${titulo}:</strong><br><br>`;
+            let html = '<strong>' + titulo + ':</strong><br><br>';
             for (const [letra, descripcion] of Object.entries(catalogo)) {
                 html += `
                     <label class="checkbox-opcion">
@@ -1292,7 +1568,7 @@
                 usuario_id: 1
             };
 
-            document.getElementById('statusMessage').textContent = '🔄 Guardando en MySQL...';
+            document.getElementById('statusMessage').textContent = 'Guardando en MySQL...';
             fetch(API_URL + 'guardar_registro.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1326,19 +1602,19 @@
                     guardarEnLocalStorage();
                     actualizarTabla();
                     cerrarModalDemerito();
-                    document.getElementById('statusMessage').textContent = `✅ ${modoNie.toUpperCase()} guardado en MySQL`;
+                    document.getElementById('statusMessage').textContent = modoNie.toUpperCase() + ' guardado en MySQL';
                     setTimeout(() => {
                         document.getElementById('statusMessage').textContent = 'Sistema listo';
                     }, 4000);
                 } else {
-                    alert('❌ Error al guardar: ' + (data.error || 'desconocido'));
-                    document.getElementById('statusMessage').textContent = '❌ Error al guardar en MySQL';
+                    alert('Error al guardar: ' + (data.error || 'desconocido'));
+                    document.getElementById('statusMessage').textContent = 'Error al guardar en MySQL';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('❌ Error de conexión con el servidor. ¿PHP está corriendo?');
-                document.getElementById('statusMessage').textContent = '❌ Error de conexión';
+                alert('Error de conexión con el servidor. ¿PHP está corriendo?');
+                document.getElementById('statusMessage').textContent = 'Error de conexión';
             });
         }
 
@@ -1355,8 +1631,10 @@
         window.onclick = function(event) {
             const modalAdd = document.getElementById('modalAgregarAlumno');
             const modalDem = document.getElementById('modalDemeritoNie');
+            const modalEst = document.getElementById('modalEstadisticas');
             if (event.target === modalAdd) cerrarModalAgregarAlumno();
             if (event.target === modalDem) cerrarModalDemerito();
+            if (event.target === modalEst) cerrarModalEstadisticas();
         };
     </script>
 </body>
